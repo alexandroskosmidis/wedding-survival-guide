@@ -18,13 +18,9 @@ import {
 
 import heroDrama from "@/assets/hero-drama.jpg";
 
-/* ---------------- Types & Static Data ---------------- */
-// Κρατάμε το πρόγραμμα και τα τηλέφωνα στατικά προς το παρόν, 
-// μέχρι να φτιάξεις (αν θες) αντίστοιχους πίνακες στη Supabase.
-
 const announcement = {
   active: true,
-  message: "Καλώς ήρθατε στη Δράμα! Εδώ θα βρείτε ό,τι χρειαστείτε.",
+  message: "Καλώς ήρθατε στη Δράμα! Ο οδηγός επιβίωσης είναι εδώ για εσάς!",
 };
 
 type TimelineItem = {
@@ -36,10 +32,12 @@ type TimelineItem = {
 };
 
 const timeline: TimelineItem[] = [
-  { time: "17:30", title: "Άφιξη Καλεσμένων", location: "Ιερός Ναός", icon: Sparkles, status: "past" },
-  { time: "18:00", title: "Μυστήριο", location: "Ιερός Ναός", icon: Heart, status: "current" },
-  { time: "20:30", title: "Δεξίωση & Δείπνο", location: "Κτήμα", icon: Utensils, status: "upcoming" },
-  { time: "23:00", title: "Πάρτι", location: "Κτήμα", icon: Music, status: "upcoming" },
+  { time: "17:30", title: "Άφιξη Καλεσμένων", location: "Στο σπίτι μας, θα το βρείτε στα locations", icon: Sparkles, status: "past" },
+  { time: "18:00", title: "Μυστήριο", location: "Ιερός Ναός Αγίου Χρυσοστόμου", icon: Heart, status: "current" },
+  { time: "19:00", title: "Photo shooting", location: "Ιερός Ναός Αγίου Χρυσοστόμου", icon: Camera, status: "upcoming" },
+  { time: "20:00", title: "Δεξίωση & Δείπνο", location: "Αίθουσα Δεξιώσεων Λούκουλος", icon: Utensils, status: "upcoming" },
+  { time: "21:00", title: "Coctail Hour", location: "Αίθουσα Δεξιώσεων Λούκουλος", icon: MapPin, status: "upcoming" },
+  { time: "22:00", title: "Πάρτι", location: "Αίθουσα Δεξιώσεων Λούκουλος", icon: Music, status: "upcoming" },
 ];
 
 type Contact = {
@@ -166,7 +164,7 @@ export default function App() {
         <div className="mx-auto max-w-3xl px-6 pt-16 pb-20 text-center sm:pt-24 sm:pb-28">
           <p className="mb-6 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.28em] text-sage">
             <span className="h-px w-6 bg-sage/60" />
-            Γάμος · 2026
+            ΗΛΙΑΣ & ΚΑΤΕΡΙΝΑ · ΣΕΠΤΕΜΒΡΙΟΣ 2026
             <span className="h-px w-6 bg-sage/60" />
           </p>
           <h1 className="text-5xl leading-[1.05] text-foreground sm:text-7xl">
@@ -185,7 +183,7 @@ export default function App() {
       <main className="mx-auto max-w-5xl space-y-24 px-4 pb-24 sm:px-6 sm:space-y-32">
         {/* Timeline */}
         <section>
-          <SectionHeading eyebrow="The Day" title="Πρόγραμμα" />
+          <SectionHeading eyebrow="The Day" title="Wedding Timeline" />
           <div className="relative mt-12 rounded-3xl bg-card p-6 shadow-[var(--shadow-soft)] sm:p-10">
             <ol className="relative">
               <span className="absolute left-[19px] top-2 bottom-2 w-px bg-border sm:left-[23px]" aria-hidden />
@@ -259,7 +257,7 @@ export default function App() {
                   
                   {/* Universal Link για Google Maps */}
                   <a
-                    href={`https://www.google.com/maps/search/?api=1&query=$${loc.latitude},${loc.longitude}`}
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.title)}`}
                     target="_blank"
                     rel="noreferrer"
                     className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-foreground px-4 py-3 text-sm font-medium text-background transition-all duration-300 hover:opacity-90"

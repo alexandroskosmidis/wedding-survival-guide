@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "./supabaseClient";
 import {
-  AlertCircle,
   MapPin,
   Star,
   Phone,
@@ -13,6 +12,8 @@ import {
   Music,
   Camera,
   Stethoscope,
+  Clapperboard,
+  X,
 } from "lucide-react";
 
 
@@ -44,13 +45,18 @@ type Contact = {
   name: string;
   role: string;
   phone: string;
-  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }> | string;
 };
 
+const coupleContacts: Contact[] = [
+  { name: "Ηλίας", role: "Γαμπρός", phone: "+30XXXXXXXXXX", icon: "🤵" },
+  { name: "Κατερίνα", role: "Νύφη", phone: "+306976464499", icon: "👰" },
+];
+
 const contacts: Contact[] = [
-  { name: "Ραδιοταξί Δράμας", role: "Μετακινήσεις 24/7", phone: "+302521022222", icon: Car },
+  { name: "Ραδιοταξί Δράμας", role: "Μετακινήσεις 24/7", phone: "+302521022022", icon: Car },
   { name: "Hair Studio", role: "Κομμωτήριο", phone: "+302521033333", icon: Scissors },
-  { name: "Νοσοκομείο Δράμας", role: "Επείγοντα", phone: "+302521350000", icon: Stethoscope },
+  { name: "Νοσοκομείο Δράμας", role: "Επείγοντα", phone: "+302521039452", icon: Stethoscope },
 ];
 
 // Το Interface της Βάσης Δεδομένων μας
@@ -59,12 +65,17 @@ interface Location {
   title: string;
   description: string | null;
   category: string;
+  class: string;
+  basic: boolean;
+  icon: string | null;
   latitude: number;
   longitude: number;
   image_url: string | null;
   stars_in_google: number | null;
   address: string | null;
 }
+
+const LOCATION_CLASSES = ["Όλα", "Αξιοθέατα", "Καφέ", "Φαγητό", "Διασκέδαση", "Events"] as const;
 
 /* ---------------- Small UI atoms ---------------- */
 
@@ -85,6 +96,32 @@ function CategoryBadge({ label }: { label: string }) {
   );
 }
 
+function ContactCard({ contact }: { contact: Contact }) {
+  const Icon = contact.icon;
+  return (
+    <div className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 rounded-3xl bg-card p-5 shadow-[var(--shadow-soft)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lifted)] sm:p-6">
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-secondary text-foreground/70">
+        {typeof Icon === "string" ? (
+          <span className="text-xl">{Icon}</span>
+        ) : (
+          <Icon className="h-5 w-5" strokeWidth={1.5} />
+        )}
+      </div>
+      <div className="min-w-0">
+        <h3 className="truncate text-base text-foreground sm:text-lg">{contact.name}</h3>
+        <p className="truncate text-xs text-muted-foreground sm:text-sm">{contact.role}</p>
+      </div>
+      <a
+        href={`tel:${contact.phone}`}
+        aria-label={`Call ${contact.name}`}
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-all duration-300 hover:scale-105 hover:opacity-95"
+      >
+        <Phone className="h-4 w-4" strokeWidth={2} />
+      </a>
+    </div>
+  );
+}
+
 function SectionHeading({ eyebrow, title }: { eyebrow: string; title: string }) {
   return (
     <div className="text-center">
@@ -100,6 +137,7 @@ export default function App() {
   const [showBanner, setShowBanner] = useState(announcement.active);
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeClass, setActiveClass] = useState<(typeof LOCATION_CLASSES)[number]>("Όλα");
 
   // Fetching data από την Supabase
   useEffect(() => {
@@ -126,30 +164,13 @@ export default function App() {
     return <div className="flex min-h-screen items-center justify-center">Φόρτωση...</div>;
   }
 
+  const basicLocations = locations.filter((loc) => loc.basic);
+  const exploreLocations = locations.filter((loc) => !loc.basic);
+  const filteredLocations =
+    activeClass === "Όλα" ? exploreLocations : exploreLocations.filter((loc) => loc.class === activeClass);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Announcement banner */}
-      {showBanner && (
-        <div className="sticky top-0 z-50 border-b border-amber-soft/60 bg-amber-soft/70 backdrop-blur-md">
-          <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3 sm:px-6">
-            <span className="relative flex h-2.5 w-2.5 shrink-0">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-terracotta opacity-60" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-terracotta" />
-            </span>
-            <AlertCircle className="h-4 w-4 shrink-0 text-amber-soft-foreground" strokeWidth={1.75} />
-            <p className="min-w-0 flex-1 truncate text-xs font-medium text-amber-soft-foreground sm:text-sm">
-              {announcement.message}
-            </p>
-            <button
-              onClick={() => setShowBanner(false)}
-              className="shrink-0 rounded-full px-2 py-1 text-[11px] font-medium text-amber-soft-foreground/70 transition-colors hover:text-amber-soft-foreground"
-            >
-              Κλείσιμο
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Hero */}
       <header className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10">
@@ -162,6 +183,25 @@ export default function App() {
         </div>
 
         <div className="mx-auto max-w-3xl px-6 pt-16 pb-20 text-center sm:pt-24 sm:pb-28">
+          {/* Welcome note */}
+          {showBanner && (
+            <div className="relative mx-auto mb-10 flex max-w-md items-start gap-3 rounded-3xl bg-card/90 px-5 py-4 text-left shadow-[var(--shadow-soft)] backdrop-blur-md sm:max-w-lg">
+              <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-terracotta/15 text-terracotta">
+                <Sparkles className="h-4 w-4" strokeWidth={1.75} />
+              </span>
+              <p className="flex-1 text-xs leading-relaxed text-foreground/80 sm:text-sm">
+                {announcement.message}
+              </p>
+              <button
+                onClick={() => setShowBanner(false)}
+                aria-label="Κλείσιμο μηνύματος"
+                className="shrink-0 rounded-full p-1 text-foreground/30 transition-colors hover:text-foreground/60"
+              >
+                <X className="h-3.5 w-3.5" strokeWidth={2} />
+              </button>
+            </div>
+          )}
+
           <p className="mb-6 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.28em] text-sage">
             <span className="h-px w-6 bg-sage/60" />
             ΗΛΙΑΣ & ΚΑΤΕΡΙΝΑ · ΣΕΠΤΕΜΒΡΙΟΣ 2026
@@ -228,11 +268,79 @@ export default function App() {
           </div>
         </section>
 
+        {/* Βασικές Τοποθεσίες (DYNAMIC SUPABASE DATA) */}
+        <section>
+          <SectionHeading eyebrow="Don't Get Lost" title="Οι βασικές τοποθεσίες για να μην χαθείτε" />
+          <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {basicLocations.map((loc) => (
+              <div
+                key={loc.id}
+                className="group flex flex-col gap-4 rounded-3xl bg-card p-5 shadow-[var(--shadow-soft)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-lifted)] sm:flex-row sm:items-center"
+              >
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-secondary text-2xl transition-transform duration-300 group-hover:scale-105">
+                  {loc.icon || "📍"}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-lg text-foreground sm:text-xl">{loc.title}</h3>
+                  {loc.address && (
+                    <p className="mt-1 flex items-start gap-1.5 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                      <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
+                      <span className="line-clamp-2">{loc.address}</span>
+                    </p>
+                  )}
+                </div>
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.address || loc.title)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-foreground px-4 py-2.5 text-sm font-medium text-background transition-all duration-300 hover:opacity-90"
+                >
+                  <MapPin className="h-4 w-4" strokeWidth={1.75} />
+                  Οδηγίες
+                </a>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* Locations (DYNAMIC SUPABASE DATA) */}
         <section>
           <SectionHeading eyebrow="Between Events" title="Εξερευνήστε τη Δράμα" />
+
+          {/* Class filter tabs */}
+          <div className="mt-8 flex flex-wrap justify-center gap-2">
+            {LOCATION_CLASSES.map((cls) => (
+              <button
+                key={cls}
+                onClick={() => setActiveClass(cls)}
+                className={[
+                  "rounded-full px-4 py-2 text-xs font-medium uppercase tracking-[0.08em] transition-colors duration-300",
+                  activeClass === cls
+                    ? "bg-foreground text-background"
+                    : "bg-secondary text-foreground/70 hover:bg-secondary/70",
+                ].join(" ")}
+              >
+                {cls}
+              </button>
+            ))}
+          </div>
+
+          {/* Festival note (μόνο στο tab "Events") */}
+          {activeClass === "Events" && (
+            <div className="mt-8 flex items-start gap-4 rounded-3xl bg-secondary/60 p-6 shadow-[var(--shadow-soft)] sm:p-8">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-terracotta/15 text-terracotta">
+                <Clapperboard className="h-5 w-5" strokeWidth={1.75} />
+              </div>
+              <p className="text-sm leading-relaxed text-foreground/80 sm:text-base">
+                Το <span className="font-medium text-foreground">49ο Διεθνές Φεστιβάλ Ταινιών Μικρού Μήκους Δράμας</span> θα
+                πραγματοποιηθεί από τις <span className="font-medium text-foreground">6 έως τις 12 Σεπτεμβρίου 2026</span>.
+                Οι προβολές και οι εκδηλώσεις θα φιλοξενηθούν στους δύο παρακάτω κεντρικούς χώρους της πόλης.
+              </p>
+            </div>
+          )}
+
           <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {locations.map((loc) => (
+            {filteredLocations.map((loc) => (
               <article
                 key={loc.id}
                 className="group flex flex-col overflow-hidden rounded-3xl bg-card shadow-[var(--shadow-soft)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-lifted)]"
@@ -274,31 +382,24 @@ export default function App() {
         {/* SOS Contacts */}
         <section>
           <SectionHeading eyebrow="Just in Case" title="Χρήσιμα Τηλέφωνα" />
-          <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {contacts.map((c) => {
-              const Icon = c.icon;
-              return (
-                <div
-                  key={c.name}
-                  className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 rounded-3xl bg-card p-5 shadow-[var(--shadow-soft)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lifted)] sm:p-6"
-                >
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-secondary text-foreground/70">
-                    <Icon className="h-5 w-5" strokeWidth={1.5} />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="truncate text-base text-foreground sm:text-lg">{c.name}</h3>
-                    <p className="truncate text-xs text-muted-foreground sm:text-sm">{c.role}</p>
-                  </div>
-                  <a
-                    href={`tel:${c.phone}`}
-                    aria-label={`Call ${c.name}`}
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-all duration-300 hover:scale-105 hover:opacity-95"
-                  >
-                    <Phone className="h-4 w-4" strokeWidth={2} />
-                  </a>
-                </div>
-              );
-            })}
+
+          {/* Τα τηλέφωνα των μελλονύμφων */}
+          <p className="mt-12 text-xs font-medium uppercase tracking-[0.2em] text-sage">
+            Τα τηλέφωνα των μελλονύμφων
+          </p>
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {coupleContacts.map((c) => (
+              <ContactCard key={c.name} contact={c} />
+            ))}
+          </div>
+
+          <p className="mt-10 text-xs font-medium uppercase tracking-[0.2em] text-sage">
+            Λοιπά Τηλέφωνα
+          </p>
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {contacts.map((c) => (
+              <ContactCard key={c.name} contact={c} />
+            ))}
           </div>
         </section>
 

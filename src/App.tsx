@@ -13,16 +13,10 @@ import {
   Camera,
   Stethoscope,
   Clapperboard,
-  X,
 } from "lucide-react";
 
 
 import heroDrama from "@/assets/hero-drama.jpg";
-
-const announcement = {
-  active: true,
-  message: "Καλώς ήρθατε στη Δράμα! Ο οδηγός επιβίωσης είναι εδώ για εσάς!",
-};
 
 type TimelineItem = {
   time: string;
@@ -55,8 +49,8 @@ const coupleContacts: Contact[] = [
 
 const contacts: Contact[] = [
   { name: "Ραδιοταξί Δράμας", role: "Μετακινήσεις 24/7", phone: "+302521022022", icon: Car },
-  { name: "Hair Studio", role: "Κομμωτήριο", phone: "+302521033333", icon: Scissors },
-  { name: "Νοσοκομείο Δράμας", role: "Επείγοντα", phone: "+302521039452", icon: Stethoscope },
+  { name: "Hair Studio", role: "Κομμωτήριο", phone: "+302521039452", icon: Scissors },
+  { name: "Νοσοκομείο Δράμας", role: "Επείγοντα", phone: "+302521 350400", icon: Stethoscope },
 ];
 
 // Το Interface της Βάσης Δεδομένων μας
@@ -134,7 +128,6 @@ function SectionHeading({ eyebrow, title }: { eyebrow: string; title: string }) 
 /* ---------------- Main App Component ---------------- */
 
 export default function App() {
-  const [showBanner, setShowBanner] = useState(announcement.active);
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeClass, setActiveClass] = useState<(typeof LOCATION_CLASSES)[number]>("Όλα");
@@ -183,25 +176,6 @@ export default function App() {
         </div>
 
         <div className="mx-auto max-w-3xl px-6 pt-16 pb-20 text-center sm:pt-24 sm:pb-28">
-          {/* Welcome note */}
-          {showBanner && (
-            <div className="relative mx-auto mb-10 flex max-w-md items-start gap-3 rounded-3xl bg-card/90 px-5 py-4 text-left shadow-[var(--shadow-soft)] backdrop-blur-md sm:max-w-lg">
-              <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-terracotta/15 text-terracotta">
-                <Sparkles className="h-4 w-4" strokeWidth={1.75} />
-              </span>
-              <p className="flex-1 text-xs leading-relaxed text-foreground/80 sm:text-sm">
-                {announcement.message}
-              </p>
-              <button
-                onClick={() => setShowBanner(false)}
-                aria-label="Κλείσιμο μηνύματος"
-                className="shrink-0 rounded-full p-1 text-foreground/30 transition-colors hover:text-foreground/60"
-              >
-                <X className="h-3.5 w-3.5" strokeWidth={2} />
-              </button>
-            </div>
-          )}
-
           <p className="mb-6 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.28em] text-sage">
             <span className="h-px w-6 bg-sage/60" />
             ΗΛΙΑΣ & ΚΑΤΕΡΙΝΑ · ΣΕΠΤΕΜΒΡΙΟΣ 2026
@@ -277,23 +251,25 @@ export default function App() {
                 key={loc.id}
                 className="group flex flex-col gap-4 rounded-3xl bg-card p-5 shadow-[var(--shadow-soft)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-lifted)] sm:flex-row sm:items-center"
               >
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-secondary text-2xl transition-transform duration-300 group-hover:scale-105">
-                  {loc.icon || "📍"}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-lg text-foreground sm:text-xl">{loc.title}</h3>
-                  {loc.address && (
-                    <p className="mt-1 flex items-start gap-1.5 text-xs leading-relaxed text-muted-foreground sm:text-sm">
-                      <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
-                      <span className="line-clamp-2">{loc.address}</span>
-                    </p>
-                  )}
+                <div className="flex items-center gap-4 sm:contents">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-secondary text-2xl transition-transform duration-300 group-hover:scale-105">
+                    {loc.icon || "📍"}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-lg text-foreground sm:text-xl">{loc.title}</h3>
+                    {loc.address && (
+                      <p className="mt-1 flex items-start gap-1.5 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                        <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
+                        <span className="line-clamp-2">{loc.address}</span>
+                      </p>
+                    )}
+                  </div>
                 </div>
                 <a
                   href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.address || loc.title)}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-foreground px-4 py-2.5 text-sm font-medium text-background transition-all duration-300 hover:opacity-90"
+                  className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-2xl bg-foreground px-4 py-2.5 text-sm font-medium text-background transition-all duration-300 hover:opacity-90 sm:w-auto"
                 >
                   <MapPin className="h-4 w-4" strokeWidth={1.75} />
                   Οδηγίες

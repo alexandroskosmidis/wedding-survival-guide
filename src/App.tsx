@@ -43,7 +43,7 @@ type Contact = {
 };
 
 const coupleContacts: Contact[] = [
-  { name: "Ηλίας", role: "Γαμπρός", phone: "+30XXXXXXXXXX", icon: "🤵" },
+  { name: "Ηλίας", role: "Γαμπρός", phone: "+306947018547", icon: "🤵" },
   { name: "Κατερίνα", role: "Νύφη", phone: "+306976464499", icon: "👰" },
 ];
 
@@ -69,7 +69,7 @@ interface Location {
   address: string | null;
 }
 
-const LOCATION_CLASSES = ["Όλα", "Αξιοθέατα", "Καφέ", "Φαγητό", "Διασκέδαση", "Events"] as const;
+const LOCATION_CLASSES = ["Αξιοθέατα", "Καφέ", "Φαγητό", "Διασκέδαση", "Events"] as const;
 
 /* ---------------- Small UI atoms ---------------- */
 
@@ -130,7 +130,7 @@ function SectionHeading({ eyebrow, title }: { eyebrow: string; title: string }) 
 export default function App() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeClass, setActiveClass] = useState<(typeof LOCATION_CLASSES)[number]>("Όλα");
+  const [activeClass, setActiveClass] = useState<(typeof LOCATION_CLASSES)[number]>(LOCATION_CLASSES[0]);
 
   // Fetching data από την Supabase
   useEffect(() => {
@@ -159,8 +159,7 @@ export default function App() {
 
   const basicLocations = locations.filter((loc) => loc.basic);
   const exploreLocations = locations.filter((loc) => !loc.basic);
-  const filteredLocations =
-    activeClass === "Όλα" ? exploreLocations : exploreLocations.filter((loc) => loc.class === activeClass);
+  const filteredLocations = exploreLocations.filter((loc) => loc.class === activeClass);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -244,7 +243,7 @@ export default function App() {
 
         {/* Βασικές Τοποθεσίες (DYNAMIC SUPABASE DATA) */}
         <section>
-          <SectionHeading eyebrow="Don't Get Lost" title="Οι βασικές τοποθεσίες για να μην χαθείτε" />
+          <SectionHeading eyebrow="Don't Get Lost" title="Οι βασικές μας τοποθεσίες" />
           <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2">
             {basicLocations.map((loc) => (
               <div
